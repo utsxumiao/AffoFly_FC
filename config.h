@@ -266,7 +266,7 @@
     /* camera trigger function : activated via Rc Options in the GUI, servo output=A2 on promini */
     // trigger interval can be changed via (*GUI*) or via AUX channel
     #define CAMTRIG
-    #define CAM_TIME_HIGH 60000   // the duration of HIGH state servo expressed in ms
+    #define CAM_TIME_HIGH 3000   // the duration of HIGH state servo expressed in ms
 
   /***********************          Airplane                       ***********************/
     //#define USE_THROTTLESERVO // For use of standard 50Hz servo on throttle.

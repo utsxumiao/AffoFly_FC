@@ -13,6 +13,7 @@
 #define RADIO_PIPE              0xE8E8F0F0E1LL
 #define RADIO_CHANNEL           125
 #define RADIO_SECURITY_TOKEN    998789
+#define RC_DATA_OFFSET          2
 
 int16_t nrf24_rcData[RC_CHANS];
 RF24 radio(NRF_CE_PIN, NRF_CSN_PIN); // CE, CSN
@@ -54,19 +55,14 @@ void NRF24_Read_RC() {
     }
   }
   
-//should trigger failsafe
-//  if (currentTime - previousSignalTime > 1000 ) {
-//    resetRF24Data(); 
-//  }
-  
-  nrf24_rcData[THROTTLE] = controlData.Throttle;
-  nrf24_rcData[ROLL] = controlData.Roll;
-  nrf24_rcData[PITCH] = controlData.Pitch;
-  nrf24_rcData[YAW] = controlData.Yaw;
-  nrf24_rcData[AUX1] = controlData.Aux1;
-  nrf24_rcData[AUX2] = controlData.Aux2;
-  nrf24_rcData[AUX3] = controlData.Aux3;
-  nrf24_rcData[AUX4] = controlData.Aux4;
+  nrf24_rcData[THROTTLE] = controlData.Throttle + RC_DATA_OFFSET;
+  nrf24_rcData[ROLL] = controlData.Roll + RC_DATA_OFFSET;
+  nrf24_rcData[PITCH] = controlData.Pitch + RC_DATA_OFFSET;
+  nrf24_rcData[YAW] = controlData.Yaw + RC_DATA_OFFSET;
+  nrf24_rcData[AUX1] = controlData.Aux1 + RC_DATA_OFFSET;
+  nrf24_rcData[AUX2] = controlData.Aux2 + RC_DATA_OFFSET;
+  nrf24_rcData[AUX3] = controlData.Aux3 + RC_DATA_OFFSET;
+  nrf24_rcData[AUX4] = controlData.Aux4 + RC_DATA_OFFSET;
 }
 
 void NRF24_Init() {
