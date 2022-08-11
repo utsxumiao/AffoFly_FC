@@ -9,7 +9,7 @@
 #if defined(NRF24_RX)
 
 #define NRF_CE_PIN              7
-#define NRF_CSN_PIN             4
+#define NRF_CSN_PIN             10
 #define RADIO_PIPE              0xE8E8F0F0E1LL
 #define RADIO_CHANNEL           125
 #define RADIO_SECURITY_TOKEN    998789
