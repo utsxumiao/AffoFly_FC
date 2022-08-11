@@ -675,16 +675,16 @@ void initOutput() {
     #if (NUMBER_MOTOR > 0)
       TCCR1A |= _BV(COM1A1); // connect pin 9 to timer 1 channel A
     #endif
-    #if defined(NRF24_RX)
-      initializeSoftPWM(); // use pin 6,5 instead of 10,11 for nRF24L01 receiver
-    #else
+    // #if defined(NRF24_RX)
+    //   initializeSoftPWM(); // use pin 6,5 instead of 10,11 for nRF24L01 receiver
+    // #else
     #if (NUMBER_MOTOR > 1)
       TCCR1A |= _BV(COM1B1); // connect pin 10 to timer 1 channel B
     #endif
     #if (NUMBER_MOTOR > 2)
       TCCR2A |= _BV(COM2A1); // connect pin 11 to timer 2 channel A
     #endif
-   #endif
+   //#endif
     #if (NUMBER_MOTOR > 3)
       TCCR2A |= _BV(COM2B1); // connect pin 3 to timer 2 channel B
     #endif
@@ -1005,7 +1005,7 @@ void initializeServo() {
 /**************************************************************************************/
 // SW PWM is only used if there are not enough HW PWM pins (for exampe hexa on a promini)
 
-#if defined(NRF24_RX) || (NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO))
+#if (NUMBER_MOTOR > 4) && (defined(PROMINI) || defined(PROMICRO))
 
   /****************    Pre define the used ISR's and Timerchannels     ******************/
   #if !defined(PROMICRO)
@@ -1052,7 +1052,7 @@ void initializeServo() {
   /****************               Motor SW PWM ISR's                 ******************/
   // hexa with old but sometimes better SW PWM method
   // for setups without servos
-  #if defined(NRF24_RX) || (NUMBER_MOTOR == 6) && (!defined(SERVO) && !defined(HWPWM6))
+  #if (NUMBER_MOTOR == 6) && (!defined(SERVO) && !defined(HWPWM6))
     ISR(SOFT_PWM_ISR1) { 
       static uint8_t state = 0;
       if(state == 0){
