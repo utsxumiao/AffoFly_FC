@@ -9,7 +9,7 @@
 #if defined(NRF24_RX)
 
 #define NRF_CE_PIN              7
-#define NRF_CSN_PIN             10
+#define NRF_CSN_PIN             4
 #define RADIO_PIPE              0xE8E8F0F0E1LL
 #define RADIO_CHANNEL           125
 #define RADIO_SECURITY_TOKEN    998789
@@ -19,6 +19,7 @@ RF24 radio(NRF_CE_PIN, NRF_CSN_PIN); // CE, CSN
 ControlData controlData;
 
 void radio_setup() {
+  radio.begin();
   radio.setPALevel(RF24_PA_MIN);
   radio.setAutoAck(false);
   radio.setChannel(RADIO_CHANNEL);
@@ -53,9 +54,10 @@ void NRF24_Read_RC() {
     }
   }
   
-  if (currentTime - previousSignalTime > 500 ) {
-    resetRF24Data(); //TODO: should trigger or dedicate to failsafe
-  }
+//should trigger failsafe
+//  if (currentTime - previousSignalTime > 1000 ) {
+//    resetRF24Data(); 
+//  }
   
   nrf24_rcData[THROTTLE] = controlData.Throttle;
   nrf24_rcData[ROLL] = controlData.Roll;
