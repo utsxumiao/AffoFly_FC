@@ -68,6 +68,7 @@ void NRF24_Read_RC() {
 void NRF24_Init() {
   resetRF24Data();
   radio_setup();
+  DDRD |= B00010000; //set pin4 as output
 }
 
 #endif
