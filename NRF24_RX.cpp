@@ -14,10 +14,12 @@
 #define RADIO_CHANNEL           125
 #define RADIO_SECURITY_TOKEN    998789
 #define RC_DATA_OFFSET          2
+#define SIGNAL_LOST_THRESHOLD   1000000 // 1 sec
 
 int16_t nrf24_rcData[RC_CHANS];
 RF24 radio(NRF_CE_PIN, NRF_CSN_PIN); // CE, CSN
 ControlData controlData;
+uint32_t previousSignalTime = 0;
 
 void radio_setup() {
   radio.begin();
@@ -32,7 +34,7 @@ void radio_setup() {
 void resetRF24Data()
 {
   controlData.Token = RADIO_SECURITY_TOKEN;
-  controlData.Throttle = 1000;
+  controlData.Throttle = 980;
   controlData.Yaw = 1500;
   controlData.Pitch = 1500;
   controlData.Roll = 1500;
@@ -43,8 +45,7 @@ void resetRF24Data()
 }
 
 void NRF24_Read_RC() {
-  uint32_t previousSignalTime = 0;
-  uint32_t currentTime = millis();
+  uint32_t currentTime = micros();
 
   ControlData tempData;
   if(radio.available()) {
@@ -53,6 +54,10 @@ void NRF24_Read_RC() {
       controlData = tempData;
       previousSignalTime = currentTime;
     }
+  }
+
+  if(currentTime - previousSignalTime >= SIGNAL_LOST_THRESHOLD) {
+    
   }
   
   nrf24_rcData[THROTTLE] = controlData.Throttle + RC_DATA_OFFSET;
@@ -68,7 +73,6 @@ void NRF24_Read_RC() {
 void NRF24_Init() {
   resetRF24Data();
   radio_setup();
-  DDRD |= B00010000; //set pin4 as output
 }
 
 #endif

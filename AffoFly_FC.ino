@@ -10,4 +10,10 @@
  *
  * Have fun, and do not forget MultiWii is made possible and brought to you under the GPL License.
  *modified by archit bubber to work with nrf24,bmp280
+
+ * 13/08/2022 by Eric Xu
+ * Modified to combine FC and RX into one single Arduino Promo Mini board
+ * NRF2401L+ module connects to the Arduino directly
+ * WARNING: This has not been implemented to work with the failsafe function, if failsafe is enabled then 
+ * it will be triggered straight away, therefore failsafe is not usable yet.
  */

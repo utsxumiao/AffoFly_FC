@@ -12,5 +12,8 @@ void readSerial_RX(void);
 #if defined(SPEK_BIND)  // Bind Support
   void spekBind(void);
 #endif
+#if defined(NRF24_RX)
+  void readNRF24_RX();
+#endif
 
 #endif /* RX_H_ */
