@@ -12,3 +12,4 @@ This FC is based on [MultiWii 2.4](https://github.com/multiwii/multiwii-firmware
  - Electrolytic Capacitor 10uf
  - Ceramic Capacitor 0.1uf
  - Some 2.54mm male pins for PWM output and power input
+ - Optional: servo for bomb dropping function (for fishing)
