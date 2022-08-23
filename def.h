@@ -387,6 +387,10 @@
   #define SERVO_8_PINMODE            pinMode(9,OUTPUT); // new
   #define SERVO_8_PIN_HIGH           PORTB |= 1<<1;
   #define SERVO_8_PIN_LOW            PORTB &= ~(1<<1);
+
+  #if defined(BOMB_DROP)
+    #define BOMBDROPPIN_PINMODE      pinMode(A2,OUTPUT);
+  #endif
 #endif
 
 /**************************  atmega32u4 (Promicro)  ***********************************/

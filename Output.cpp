@@ -1087,6 +1087,22 @@ void initializeServo() {
         SOFT_PWM_CHANNEL2 += atomicPWM_PIN6_lowState;
         state = 0;   
       }
+
+      #if defined(BOMB_DROP)
+      static uint32_t frameStartTime = 0;
+      static uint8_t pinState = 0;
+      //debug[1] = rcData[AUX4];
+      uint32_t interruptTime = micros();
+      if((interruptTime - frameStartTime >= 20000) && !pinState) {
+        frameStartTime = interruptTime;
+        PORTC |= B00000100;
+        pinState = 1;
+      }
+      if((interruptTime - frameStartTime >= rcData[AUX4]) && pinState) {
+        PORTC &= B11111011;
+        pinState = 0;
+      }
+      #endif
     }
   #else
     #if (NUMBER_MOTOR > 4) && !defined(HWPWM6)

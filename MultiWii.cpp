@@ -25,7 +25,6 @@ March  2015     V2.4
 #include "Serial.h"
 #include "GPS.h"
 #include "Protocol.h"
-
 #include "NRF24_RX.h"
 
 #include <avr/pgmspace.h>
@@ -642,6 +641,9 @@ void setup() {
   BUZZERPIN_PINMODE;
   STABLEPIN_PINMODE;
   POWERPIN_OFF;
+  #if defined(BOMB_DROP)
+    BOMBDROPPIN_PINMODE;
+  #endif
   initOutput();
   readGlobalSet();
   #ifndef NO_FLASH_CHECK
@@ -856,13 +858,8 @@ void loop () {
     Read_OpenLRS_RC();
   #endif 
   #if defined(NRF24_RX)
-  NRF24_Read_RC();
+    NRF24_Read_RC();
   #endif
-
-  uint16_t servoHighDuration = rcData[AUX1] * 10; //This fits in 50hz
-  if(currentTime-rcTime >= servoHighDuration) {
-    PORTD = PORTD && B11101111; // pulse low
-  }
   
   #if defined(SERIAL_RX)
   if ((spekFrameDone == 0x01) || ((int16_t)(currentTime-rcTime) >0 )) { 
@@ -871,7 +868,6 @@ void loop () {
   if ((int16_t)(currentTime-rcTime) >0 ) { // 50Hz
   #endif
     rcTime = currentTime + 20000;
-    PORTD = PORTD | B00010000; // pulse high
     computeRC();
     // Failsafe routine - added by MIS
     #if defined(FAILSAFE)

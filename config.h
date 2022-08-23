@@ -607,6 +607,8 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
     
     #define FAILSAFE_DETECT_TRESHOLD  985
 
+  /********                             Bomb drop                    ********************/
+    #define BOMB_DROP
 
   /*****************                DFRobot LED RING    *********************************/
     /* I2C DFRobot LED RING communication */
