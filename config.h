@@ -58,9 +58,9 @@
        This is the minimum value that allow motors to run at a idle speed  */
     //#define MINTHROTTLE 1300 // for Turnigy Plush ESCs 10A
     //#define MINTHROTTLE 1120 // for Super Simple ESCs 10A
-    #define MINTHROTTLE 1064 // special ESC (simonk)
+    //#define MINTHROTTLE 1064 // special ESC (simonk)
     //#define MINTHROTTLE 1050 // for brushed ESCs like ladybird
-    //#define MINTHROTTLE 1150 // (*) (**)
+    #define MINTHROTTLE 1150 // (*) (**)
 
   /****************************    Motor maxthrottle    *******************************/
     /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
@@ -227,8 +227,8 @@
     #define PID_CONTROLLER 1
 
     /* NEW: not used anymore for servo coptertypes  <== NEEDS FIXING - MOVE TO WIKI */
-    //#define YAW_DIRECTION 1
-    #define YAW_DIRECTION -1 // if you want to reverse the yaw correction direction
+    #define YAW_DIRECTION 1
+    //#define YAW_DIRECTION -1 // if you want to reverse the yaw correction direction
     //#define YAW_DIRECTION 0 //if yaw aligned custom trial may ruin your copter
 
     #define ONLYARMWHENFLAT //prevent the copter from arming when the copter is tilted
@@ -525,7 +525,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
       //#define GYRO_LPF_256HZ     // This is the default setting, no need to uncomment, just for reference
       //#define GYRO_LPF_188HZ
       //#define GYRO_LPF_98HZ
-      //#define GYRO_LPF_42HZ
+      #define GYRO_LPF_42HZ
       //#define GYRO_LPF_20HZ
       //#define GYRO_LPF_10HZ
       //#define GYRO_LPF_5HZ       // Use this only in extreme cases, rather change motors and/or props -- setting not available on ITG3200
