@@ -70,6 +70,21 @@ void initializeServo();
     volatile uint8_t atomicPWM_PIN12_lowState;
     volatile uint8_t atomicPWM_PIN12_highState;
   #endif
+  #if defined(BOMB_DROP)
+    // Adjust BOMBDROP_PWM_MAX and BOMBDROP_PWM_MIN to adjust the operating angles of Servo motor
+    //   If value is over the limit, the Servo will jitter
+  	#define BOMBDROP_PWM_MAX  25  // PWM value of Servo Max Value
+  	#define BOMBDROP_PWM_MIN  10  // PWM value of Servo Min Value
+    // The combination of MAX_PWM_VAL being 250 and ISR_NUM_LOOPS being 5 makes smooth 50Hz PWM signal
+    //    on Timer 1
+  	#define MAX_PWM_VAL 250
+  	#define ISR_NUM_LOOPS 5
+    // BOMBDROP_PWM expects a value between 1000 and 2000
+  	#define BOMBDROP_PWM(x) map(x, 1000, 2000, BOMBDROP_PWM_MIN, BOMBDROP_PWM_MAX)
+
+    volatile uint8_t atomicPWM_BOMBDROP_lowState;
+    volatile uint8_t atomicPWM_BOMBDROP_highState;
+  #endif
 #else
   #if (NUMBER_MOTOR > 4)
     //for HEX Y6 and HEX6/HEX6X/HEX6H and for Promicro
@@ -503,6 +518,10 @@ void writeMotors() { // [1000;2000] => [125;250]
     atomicPWM_PIN12_highState = ((motor[7]-1000)>>2)+5;
     atomicPWM_PIN12_lowState  = 245-atomicPWM_PIN12_highState;
   #endif
+  #if defined(BOMB_DROP)
+  	atomicPWM_BOMBDROP_highState = BOMBDROP_PWM(rcData[AUX4]);
+	  atomicPWM_BOMBDROP_lowState  = MAX_PWM_VAL - atomicPWM_BOMBDROP_highState;
+  #endif
 #endif 
 }
 
@@ -693,6 +712,14 @@ void initOutput() {
         pinMode(5,INPUT);pinMode(6,INPUT);     // we reactivate the INPUT affectation for these two PINs
         pinMode(A0,OUTPUT);pinMode(A1,OUTPUT);
       #endif
+    #endif
+    #if defined(BOMB_DROP)
+		  TCNT1 = 0;
+		  TCCR1A = 0;
+		  TCCR1B = 0;
+
+	  	TCCR1B |= (1 << CS12);
+  		TIMSK1 |= (1 << OCIE1B);
     #endif
   #endif
 
@@ -1089,6 +1116,7 @@ void initializeServo() {
       }
 
       #if defined(BOMB_DROP)
+/*
       static uint32_t frameStartTime = 0;
       static uint8_t pinState = 0;
       //debug[1] = rcData[AUX4];
@@ -1102,8 +1130,35 @@ void initializeServo() {
         PORTC &= B11111011;
         pinState = 0;
       }
+*/
       #endif
     }
+    
+    #if defined(BOMB_DROP)
+		ISR(TIMER1_COMPB_vect)  {
+		  static int highState = ISR_NUM_LOOPS;
+		  static int lowState = ISR_NUM_LOOPS;
+
+		  if (highState > 0)  {
+		    SOFT_PWM_3_PIN_HIGH
+		    OCR1B += atomicPWM_BOMBDROP_highState;
+
+		    highState--;
+		    if (highState == 0) {
+		      lowState = ISR_NUM_LOOPS;
+		    }
+		  }
+		  else  {
+		    SOFT_PWM_3_PIN_LOW
+		    OCR1B += atomicPWM_BOMBDROP_lowState;
+
+		    lowState--;
+		    if (lowState == 0) {
+		      highState = ISR_NUM_LOOPS;
+		    }
+		  }
+		}
+    #endif
   #else
     #if (NUMBER_MOTOR > 4) && !defined(HWPWM6)
       // HEXA with just OCR0B 
