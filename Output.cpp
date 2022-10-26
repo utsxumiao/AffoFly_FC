@@ -71,19 +71,15 @@ void initializeServo();
     volatile uint8_t atomicPWM_PIN12_highState;
   #endif
   #if defined(BOMB_DROP)
-    // Adjust BOMBDROP_PWM_MAX and BOMBDROP_PWM_MIN to adjust the operating angles of Servo motor
+    // Adjust BOMBDROP_FRAME_MAX and BOMBDROP_FRAME_MIN to adjust the operating angles of Servo motor
     //   If value is over the limit, the Servo will jitter
-  	#define BOMBDROP_PWM_MAX  25  // PWM value of Servo Max Value
-  	#define BOMBDROP_PWM_MIN  10  // PWM value of Servo Min Value
-    // The combination of MAX_PWM_VAL being 250 and ISR_NUM_LOOPS being 5 makes smooth 50Hz PWM signal
-    //    on Timer 1
-  	#define MAX_PWM_VAL 250
-  	#define ISR_NUM_LOOPS 5
+  	#define BOMBDROP_FRAME_MAX  25  // PWM value of Servo Max Value
+  	#define BOMBDROP_FRAME_MIN  1  // PWM value of Servo Min Value
     // BOMBDROP_PWM expects a value between 1000 and 2000
-  	#define BOMBDROP_PWM(x) map(x, 1000, 2000, BOMBDROP_PWM_MIN, BOMBDROP_PWM_MAX)
+  	#define BOMBDROP_PWM(x) map(x, 1000, 2000, BOMBDROP_FRAME_MIN, BOMBDROP_FRAME_MAX)
 
-    volatile uint8_t atomicPWM_BOMBDROP_lowState;
-    volatile uint8_t atomicPWM_BOMBDROP_highState;
+    volatile uint16_t atomicPWM_BOMBDROP_highLoops = 0;
+    volatile uint16_t atomicPWM_BOMBDROP_lowLoops = 0;
   #endif
 #else
   #if (NUMBER_MOTOR > 4)
@@ -518,9 +514,20 @@ void writeMotors() { // [1000;2000] => [125;250]
     atomicPWM_PIN12_highState = ((motor[7]-1000)>>2)+5;
     atomicPWM_PIN12_lowState  = 245-atomicPWM_PIN12_highState;
   #endif
+
+
+
   #if defined(BOMB_DROP)
-  	atomicPWM_BOMBDROP_highState = BOMBDROP_PWM(rcData[AUX4]);
-	  atomicPWM_BOMBDROP_lowState  = MAX_PWM_VAL - atomicPWM_BOMBDROP_highState;
+    int pwmVal = BOMBDROP_PWM(rcData[AUX4]);
+    int counter = 0;
+    int maxCount = 20;
+    
+    OCR1B = 4999; // 16 Mhz -> 50 Hz
+
+    counter = ceil(((float)maxCount / 256.0) * (float)pwmVal);
+
+    atomicPWM_BOMBDROP_highLoops = counter;
+    atomicPWM_BOMBDROP_lowLoops = maxCount - atomicPWM_BOMBDROP_highLoops;
   #endif
 #endif 
 }
@@ -714,11 +721,12 @@ void initOutput() {
       #endif
     #endif
     #if defined(BOMB_DROP)
-		  TCNT1 = 0;
-		  TCCR1A = 0;
-		  TCCR1B = 0;
+		  //TCNT1 = 0;
+		  // TCCR1A = 0;
+		  // TCCR1B = 0; // this code causes the Pin 9 to zero (0) pwm signal
 
-	  	TCCR1B |= (1 << CS12);
+      //TCCR1A |= _BV(COM1B1); // connect Bomb Drop Servo to timer 1 channel B
+	  	TCCR1B |= (1 << CS11) | (1 << CS10);  // 64 prescaler
   		TIMSK1 |= (1 << OCIE1B);
     #endif
   #endif
@@ -1133,32 +1141,40 @@ void initializeServo() {
 */
       #endif
     }
-    
+
     #if defined(BOMB_DROP)
+
 		ISR(TIMER1_COMPB_vect)  {
-		  static int highState = ISR_NUM_LOOPS;
-		  static int lowState = ISR_NUM_LOOPS;
+		  static uint16_t highState = 0;
+		  static uint16_t lowState = 0;
+
+      if ((highState + lowState) == 0)  {
+        highState = atomicPWM_BOMBDROP_highLoops; // atomicPWM_BOMBDROP_highLoops;
+        lowState = atomicPWM_BOMBDROP_lowLoops; // atomicPWM_BOMBDROP_lowLoops;
+      }
 
 		  if (highState > 0)  {
-		    SOFT_PWM_3_PIN_HIGH
-		    OCR1B += atomicPWM_BOMBDROP_highState;
+        SOFT_PWM_3_PIN_HIGH
 
-		    highState--;
+        highState--;
+
 		    if (highState == 0) {
-		      lowState = ISR_NUM_LOOPS;
+		      lowState = atomicPWM_BOMBDROP_lowLoops; // atomicPWM_BOMBDROP_lowLoops;
 		    }
-		  }
-		  else  {
-		    SOFT_PWM_3_PIN_LOW
-		    OCR1B += atomicPWM_BOMBDROP_lowState;
+      }
+		  else if (lowState > 0)  {
+	      SOFT_PWM_3_PIN_LOW
 
-		    lowState--;
+        lowState--;
+
 		    if (lowState == 0) {
-		      highState = ISR_NUM_LOOPS;
+		      highState = atomicPWM_BOMBDROP_highLoops; // atomicPWM_BOMBDROP_highLoops;
 		    }
-		  }
+      }
 		}
+
     #endif
+
   #else
     #if (NUMBER_MOTOR > 4) && !defined(HWPWM6)
       // HEXA with just OCR0B 
